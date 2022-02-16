@@ -5,6 +5,13 @@ SPIKE_GENERATOR = "spike_generator"
 IAF_COND_ALPHA = "iaf_cond_alpha"
 NOISE_GENERATOR = "noise_generator"
 
+RETINAL_GANGLION_CELL = "Retinal_ganglion_cell"
+LGN_RELAY_CELL = "LGN_relay_cell"
+LGN_INTERNEURON = "LGN_interneuron"
+CORTEX_EXC_CELL = "Cortex_excitatory_cell"
+CORTEX_INH_CELL = "Cortex_inhibitory_cell"
+THALAMO_NOISE = "thalamo_noise"
+
 
 class Model:
     _name: str
