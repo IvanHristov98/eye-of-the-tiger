@@ -11,6 +11,8 @@ LGN_INTERNEURON = "LGN_interneuron"
 CORTEX_EXC_CELL = "Cortex_excitatory_cell"
 CORTEX_INH_CELL = "Cortex_inhibitory_cell"
 THALAMO_NOISE = "thalamo_noise"
+SYN = "syn"
+STATIC_SYNAPSE = "static_synapse"
 
 
 class Model:

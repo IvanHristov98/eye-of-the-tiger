@@ -72,6 +72,19 @@ class PopSize:
         pass
 
 
+def pop_size_from_cfg(cfg: Config) -> PopSize:
+    pop_size = PopSize()
+    pop_size.rows_color_luminance_exc = cfg.cortex_cnt // 2
+    pop_size.rows_luminance_preferring_exc = cfg.cortex_cnt
+    pop_size.rows_color_preferring_exc = cfg.cortex_cnt // 2
+
+    pop_size.rows_color_luminance_inh = cfg.cortex_cnt // 4
+    pop_size.rows_luminance_preferring_inh = cfg.cortex_cnt // 2
+    pop_size.rows_color_preferring_inh = cfg.cortex_cnt // 4
+    
+    return pop_size
+
+
 def layers(cfg:Config) -> Tuple[str, Dict]:
     ls = [_lgn_layers(cfg)]
     ls += [_cortex_color_luminance_exc_layers(cfg), _cortex_luminance_preferring_exc_layers(cfg), _cortex_color_preferring_exc_layers(cfg)]
@@ -106,7 +119,7 @@ def _lgn_layers(cfg: Config) -> Tuple[str, Dict]:
 
 def _cortex_color_luminance_exc_layers(cfg: Config) -> Tuple[str, Dict]:
     base_props = _base_cortex_layer_props()
-    pop_size = _pop_size_from_cfg(cfg)
+    pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_EXC_CELL,
         'rows': pop_size.rows_color_luminance_exc,
@@ -128,7 +141,7 @@ def _cortex_color_luminance_exc_layers(cfg: Config) -> Tuple[str, Dict]:
 
 def _cortex_luminance_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
     base_props = _base_cortex_layer_props()
-    pop_size = _pop_size_from_cfg(cfg)
+    pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_EXC_CELL,
         'rows': pop_size.rows_luminance_preferring_exc,
@@ -145,7 +158,7 @@ def _cortex_luminance_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
 
 def _cortex_color_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
     base_props = _base_cortex_layer_props()
-    pop_size = _pop_size_from_cfg(cfg)
+    pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_EXC_CELL,
         'rows': pop_size.rows_color_preferring_exc,
@@ -160,7 +173,7 @@ def _cortex_color_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
 
 def _cortex_color_luminance_inh_layers(cfg: Config) -> Tuple[str, Dict]:
     base_props = _base_cortex_layer_props()
-    pop_size = _pop_size_from_cfg(cfg)
+    pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_INH_CELL,
         'rows': pop_size.rows_color_luminance_inh,
@@ -181,7 +194,7 @@ def _cortex_color_luminance_inh_layers(cfg: Config) -> Tuple[str, Dict]:
 
 def _cortex_luminance_preferring_inh_layers(cfg: Config) -> Tuple[str, Dict]:
     base_props = _base_cortex_layer_props()
-    pop_size = _pop_size_from_cfg(cfg)
+    pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_INH_CELL,
         'rows': pop_size.rows_luminance_preferring_inh,
@@ -198,7 +211,7 @@ def _cortex_luminance_preferring_inh_layers(cfg: Config) -> Tuple[str, Dict]:
 
 def _cortex_color_preferring_inh_layers(cfg: Config) -> Tuple[str, Dict]:
     base_props = _base_cortex_layer_props()
-    pop_size = _pop_size_from_cfg(cfg)
+    pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_INH_CELL,
         'rows': pop_size.rows_color_preferring_inh,
@@ -216,7 +229,7 @@ def _noise_gen_layers(cfg: Config) -> Tuple[str, Dict]:
     lgn_noise_layers = [(NOISE_GENERATORS_LGN, _merged_dicts(base_lgn_props, {'elements': mdl.THALAMO_NOISE}))]
     
     base_cortex_props = _base_cortex_layer_props()
-    ps = _pop_size_from_cfg(cfg)
+    ps = pop_size_from_cfg(cfg)
     
     cortex_exc_noise_layers = [
         (NOISE_GENERATORS_COLOR_LUMINANCE, _merged_dicts(base_cortex_props, {'elements': mdl.THALAMO_NOISE,
@@ -243,19 +256,6 @@ def _merged_dicts(a: Dict, b: Dict) -> Dict:
     c = a.copy()
     c.update(b)
     return c
-
-
-def _pop_size_from_cfg(cfg: Config) -> PopSize:
-    pop_size = PopSize()
-    pop_size.rows_color_luminance_exc = cfg.cortex_cnt // 2
-    pop_size.rows_luminance_preferring_exc = cfg.cortex_cnt
-    pop_size.rows_color_preferring_exc = cfg.cortex_cnt // 2
-
-    pop_size.rows_color_luminance_inh = cfg.cortex_cnt // 4
-    pop_size.rows_luminance_preferring_inh = cfg.cortex_cnt // 2
-    pop_size.rows_color_preferring_inh = cfg.cortex_cnt // 4
-    
-    return pop_size
 
 
 def _base_lgn_layer_props(cfg: Config) -> Dict:
