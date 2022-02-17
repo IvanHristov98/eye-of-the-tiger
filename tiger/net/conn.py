@@ -31,7 +31,7 @@ class FigConnConfig:
 
 
 # Returns connections between layers.
-def get_connections(cfg: Config):
+def get_connections(cfg: Config) -> List:
     pop_size = lyr.pop_size_from_cfg()
     _copy_synapse_model()
 
