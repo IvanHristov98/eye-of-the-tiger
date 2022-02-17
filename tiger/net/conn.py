@@ -50,6 +50,7 @@ def get_connections(cfg: Config) -> List:
     # Inhibitory
     conns += _relay_cells_to_color_luminance_inh_cells(cfg, pop_size)
     conns += _relay_cells_to_luminance_preferring_inh_cells(cfg, pop_size)
+    conns += _relay_cells_to_color_preferring_inh_cells(cfg, pop_size)
     
     # Gaussian noise connections
     conns += _noise_to_relay_cells(cfg)
@@ -359,7 +360,7 @@ def _relay_cells_to_luminance_preferring_inh_cells(cfg: Config, pop_size: lyr.Po
     ]
 
 
-def _relay_cells_to_color_preferring_cells(cfg: Config, pop_size: lyr.PopSize) -> List:
+def _relay_cells_to_color_preferring_inh_cells(cfg: Config, pop_size: lyr.PopSize) -> List:
     fig_cfg = FigConnConfig(cfg)
     fig_cfg.center_weight_ns = 3.0
     fig_cfg.mean_delay_ms = 3.0
