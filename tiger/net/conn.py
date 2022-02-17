@@ -51,6 +51,12 @@ def get_connections(cfg: Config):
     conns += _relay_cells_to_color_luminance_inh_cells(cfg, pop_size)
     conns += _relay_cells_to_luminance_preferring_inh_cells(cfg, pop_size)
     
+    # Gaussian noise connections
+    conns += _noise_to_relay_cells(cfg)
+    conns += _noise_to_interneuron(cfg)
+    conns += _noise_to_excitatory_cortex_cells(cfg)
+    conns += _noise_to_inhibitory_cortex_cells(cfg)
+    
     return conns
 
 
@@ -486,3 +492,102 @@ def _create_target_layer(cfg: FigConnConfig) -> Any:
     }
 
     return tp.CreateLayer(layerProps)
+
+
+def _noise_to_relay_cells(cfg: FigConnConfig) -> Any:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sources = mdl.THALAMO_NOISE
+    fig_cfg.targets = mdl.LGN_RELAY_CELL
+    
+    noise_params = _make_noise_conn_dict(fig_cfg)
+    
+    return [
+        [lyr.NOISE_GENERATORS_LGN, lyr.PARVO_LGN_RELAY_CELL_L_ON, noise_params],
+        [lyr.NOISE_GENERATORS_LGN, lyr.PARVO_LGN_RELAY_CELL_L_OFF, noise_params],
+        [lyr.NOISE_GENERATORS_LGN, lyr.PARVO_LGN_RELAY_CELL_M_ON, noise_params],
+        [lyr.NOISE_GENERATORS_LGN, lyr.PARVO_LGN_RELAY_CELL_M_OFF, noise_params],
+    ]
+
+
+def _noise_to_interneuron(cfg: FigConnConfig) -> Any:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sources = mdl.THALAMO_NOISE
+    fig_cfg.targets = mdl.LGN_INTERNEURON
+    
+    noise_params = _make_noise_conn_dict(fig_cfg)
+    
+    return [
+        [lyr.NOISE_GENERATORS_LGN, lyr.PARVO_LGN_INTERNEURON_ON, noise_params],
+        [lyr.NOISE_GENERATORS_LGN, lyr.PARVO_LGN_INTERNEURON_OFF, noise_params],
+    ]
+
+
+def _noise_to_excitatory_cortex_cells(cfg: FigConnConfig) -> Any:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sources = mdl.THALAMO_NOISE
+    fig_cfg.targets = mdl.CORTEX_EXC_CELL
+    
+    noise_params = _make_noise_conn_dict(fig_cfg)
+    
+    return [
+        # color-luminance
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_L_ON_L_OFF_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_L_ON_L_OFF_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_L_OFF_L_ON_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_L_OFF_L_ON_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_M_ON_M_OFF_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_M_ON_M_OFF_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_M_OFF_M_ON_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE, lyr.COLOR_LUMINANCE_M_OFF_M_ON_HORIZONTAL, noise_params],
+        # luminance-preferring
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING, lyr.LUMINANCE_PREFERRING_ON_OFF_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING, lyr.LUMINANCE_PREFERRING_ON_OFF_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING, lyr.LUMINANCE_PREFERRING_OFF_ON_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING, lyr.LUMINANCE_PREFERRING_OFF_ON_HORIZONTAL, noise_params],
+        # color-preferring
+        [lyr.NOISE_GENERATORS_COLOR_PREFERRING, lyr.COLOR_PREFERRING_L_ON_M_OFF, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_PREFERRING, lyr.COLOR_PREFERRING_M_ON_L_OFF, noise_params],
+    ]
+
+
+def _noise_to_inhibitory_cortex_cells(cfg: FigConnConfig) -> Any:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sources = mdl.THALAMO_NOISE
+    fig_cfg.targets = mdl.CORTEX_INH_CELL
+    
+    noise_params = _make_noise_conn_dict(fig_cfg)
+    
+    return [
+        # color-luminance
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_LUMINANCE_INH, lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_HORIZONTAL, noise_params],
+        # luminance-preferring
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING_INH, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING_INH, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_HORIZONTAL, noise_params],
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING_INH, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_VERTICAL, noise_params],
+        [lyr.NOISE_GENERATORS_LUMINANCE_PREFERRING_INH, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_HORIZONTAL, noise_params],
+        # color-preferring
+        [lyr.NOISE_GENERATORS_COLOR_PREFERRING_INH, lyr.COLOR_PREFERRING_INH_L_ON_M_OFF, noise_params],
+        [lyr.NOISE_GENERATORS_COLOR_PREFERRING_INH, lyr.COLOR_PREFERRING_INH_M_ON_L_OFF, noise_params],
+    ]
+
+
+def _make_noise_conn_dict(cfg: FigConnConfig) -> Any:
+    return {
+        "connection_type":"convergent",
+        "mask": {"circular": {"radius": 0.001}}, # one-to-one connection
+        "kernel": 1.0,
+        "delays" : cfg.cfg.sim_step_ms,
+        "synapse_model": mdl.SYN,
+        "weights": 1.0,
+        "sources": {"model": cfg.sources},
+        "targets": {"model": cfg.targets},
+        "allow_autapses":False,
+        "allow_multapses":False
+    }
