@@ -42,7 +42,14 @@ def get_connections(cfg: Config):
     conns += _interneurons_to_interneurons(cfg)
     
     # Thalamocortical connections
+    # Excitatory
     conns += _relay_cells_to_color_luminance_cells(cfg, pop_size)
+    conns += _relay_cells_to_luminance_preferring_cells(cfg, pop_size)
+    conns += _relay_cells_to_color_preferring_cells(cfg, pop_size)
+    
+    # Inhibitory
+    conns += _relay_cells_to_color_luminance_inh_cells(cfg, pop_size)
+    conns += _relay_cells_to_luminance_preferring_inh_cells(cfg, pop_size)
     
     return conns
 
@@ -182,6 +189,190 @@ def _relay_cells_to_color_luminance_cells(cfg: Config, pop_size: lyr.PopSize) ->
         [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_LUMINANCE_M_OFF_M_ON_VERTICAL, color_luminance_vertical_off_params],
         [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.COLOR_LUMINANCE_M_OFF_M_ON_HORIZONTAL, color_luminance_horizontal_on_params],
         [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_LUMINANCE_M_OFF_M_ON_HORIZONTAL, color_luminance_horizontal_off_params],
+    ]
+
+
+def _relay_cells_to_luminance_preferring_cells(cfg: Config, pop_size: lyr.PopSize) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.center_weight_ns = 1.25
+    fig_cfg.mean_delay_ms = 3.0 # (Hill_2005)
+    fig_cfg.std_delay_ms = 0.25 # (Hill_2005)
+    fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.target_row_cnt = mdl.CORTEX_EXC_CELL
+    fig_cfg.src_row_cnt = cfg.lgn_cnt
+    fig_cfg.target_row_cnt = pop_size.rows_color_luminance_exc
+    
+    fig_cfg.mask_points = [-0.026, -0.06, 0.026, 0.06]
+    luminance_preferring_vertical_on_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.026 + D, -0.06, 0.026 + D, 0.06]
+    luminance_preferring_vertical_off_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.06, -0.026, 0.06, 0.026]
+    luminance_preferring_horizontal_on_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.06, -0.026 + D, 0.06, 0.026 + D]
+    luminance_preferring_horizontal_off_params = _make_rect_conn_dict(fig_cfg)
+    
+    return [
+        # ON_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_ON_OFF_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_ON_OFF_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_ON_OFF_VERTICAL, luminance_preferring_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_ON_OFF_VERTICAL, luminance_preferring_vertical_off_params],
+
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_off_params],
+        # OFF_ON
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_OFF_ON_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_OFF_ON_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_OFF_ON_VERTICAL, luminance_preferring_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_OFF_ON_VERTICAL, luminance_preferring_vertical_off_params],
+        
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_off_params],
+    ]
+
+
+def _relay_cells_to_color_preferring_cells(cfg: Config, pop_size: lyr.PopSize) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.center_weight_ns = 2.5
+    fig_cfg.mean_delay_ms = 3.0
+    fig_cfg.std_delay_ms = 0.25
+    fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.target_row_cnt = mdl.CORTEX_EXC_CELL
+    fig_cfg.src_row_cnt = cfg.lgn_cnt
+    fig_cfg.target_row_cnt = pop_size.rows_color_preferring_exc
+    fig_cfg.mask_points = [-0.06,-0.06,0.06,0.06]
+
+    non_oriented_color_params = _make_rect_conn_dict(fig_cfg)
+    
+    return [
+        # L_ON_M_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.COLOR_PREFERRING_L_ON_M_OFF, non_oriented_color_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.COLOR_PREFERRING_L_ON_M_OFF, non_oriented_color_params],
+        # M_ON_L_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.COLOR_PREFERRING_M_ON_L_OFF, non_oriented_color_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_PREFERRING_M_ON_L_OFF, non_oriented_color_params],
+    ]
+
+
+def _relay_cells_to_color_luminance_inh_cells(cfg: Config, pop_size: lyr.PopSize) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.center_weight_ns = 3.0
+    fig_cfg.mean_delay_ms = 3.0 # (Hill_2005)
+    fig_cfg.std_delay_ms = 0.25 # (Hill_2005)
+    fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.target_row_cnt = mdl.CORTEX_INH_CELL
+    fig_cfg.src_row_cnt = cfg.lgn_cnt
+    fig_cfg.target_row_cnt = pop_size.rows_color_luminance_inh
+    
+    fig_cfg.mask_points = [-0.026, -0.06, 0.026, 0.06]
+    color_luminance_vertical_on_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.026 + D, -0.06, 0.026 + D, 0.06]
+    color_luminance_vertical_off_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.06, -0.026, 0.06, 0.026]
+    color_luminance_horizontal_on_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.06, -0.026 + D, 0.06, 0.026 + D]
+    color_luminance_horizontal_off_params = _make_rect_conn_dict(fig_cfg)
+    
+    return [
+        # L_ON_L_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_VERTICAL, color_luminance_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_VERTICAL, color_luminance_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_HORIZONTAL, color_luminance_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_HORIZONTAL, color_luminance_horizontal_off_params],
+        # L_OFF_L_ON
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_VERTICAL, color_luminance_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_VERTICAL, color_luminance_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_HORIZONTAL, color_luminance_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_HORIZONTAL, color_luminance_horizontal_off_params],
+        # M_ON_M_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_VERTICAL, color_luminance_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_VERTICAL, color_luminance_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_HORIZONTAL, color_luminance_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_HORIZONTAL, color_luminance_horizontal_off_params],
+        # M_OFF_M_ON
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_VERTICAL, color_luminance_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_VERTICAL, color_luminance_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_HORIZONTAL, color_luminance_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_HORIZONTAL, color_luminance_horizontal_off_params],
+    ]
+
+
+def _relay_cells_to_luminance_preferring_inh_cells(cfg: Config, pop_size: lyr.PopSize) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.center_weight_ns = 1.5
+    fig_cfg.mean_delay_ms = 3.0 # (Hill_2005)
+    fig_cfg.std_delay_ms = 0.25 # (Hill_2005)
+    fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.target_row_cnt = mdl.CORTEX_INH_CELL
+    fig_cfg.src_row_cnt = cfg.lgn_cnt
+    fig_cfg.target_row_cnt = pop_size.rows_color_luminance_inh
+    
+    fig_cfg.mask_points = [-0.026, -0.06, 0.026, 0.06]
+    luminance_preferring_vertical_on_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.026 + D, -0.06, 0.026 + D, 0.06]
+    luminance_preferring_vertical_off_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.06, -0.026, 0.06, 0.026]
+    luminance_preferring_horizontal_on_params = _make_rect_conn_dict(fig_cfg)
+    
+    fig_cfg.mask_points = [-0.06, -0.026 + D, 0.06, 0.026 + D]
+    luminance_preferring_horizontal_off_params = _make_rect_conn_dict(fig_cfg)
+    
+    return [
+        # ON_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_VERTICAL, luminance_preferring_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_VERTICAL, luminance_preferring_vertical_off_params],
+
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_INH_ON_OFF_HORIZONTAL, luminance_preferring_horizontal_off_params],
+        # OFF_ON
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_VERTICAL, luminance_preferring_vertical_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_VERTICAL, luminance_preferring_vertical_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_VERTICAL, luminance_preferring_vertical_off_params],
+        
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_on_params],
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_off_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.LUMINANCE_PREFERRING_INH_OFF_ON_HORIZONTAL, luminance_preferring_horizontal_off_params],
+    ]
+
+
+def _relay_cells_to_color_preferring_cells(cfg: Config, pop_size: lyr.PopSize) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.center_weight_ns = 3.0
+    fig_cfg.mean_delay_ms = 3.0
+    fig_cfg.std_delay_ms = 0.25
+    fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.target_row_cnt = mdl.CORTEX_INH_CELL
+    fig_cfg.src_row_cnt = cfg.lgn_cnt
+    fig_cfg.target_row_cnt = pop_size.rows_color_preferring_inh
+    fig_cfg.mask_points = [-0.06,-0.06,0.06,0.06]
+
+    non_oriented_color_params = _make_rect_conn_dict(fig_cfg)
+    
+    return [
+        # L_ON_M_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_L_ON, lyr.COLOR_PREFERRING_INH_L_ON_M_OFF, non_oriented_color_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_OFF, lyr.COLOR_PREFERRING_INH_L_ON_M_OFF, non_oriented_color_params],
+        # M_ON_L_OFF
+        [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.COLOR_PREFERRING_INH_M_ON_L_OFF, non_oriented_color_params],
+        [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_PREFERRING_INH_M_ON_L_OFF, non_oriented_color_params],
     ]
 
 
