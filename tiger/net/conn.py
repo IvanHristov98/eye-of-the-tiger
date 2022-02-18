@@ -58,6 +58,9 @@ def get_connections(cfg: Config) -> List:
     conns += _noise_to_excitatory_cortex_cells(cfg)
     conns += _noise_to_inhibitory_cortex_cells(cfg)
     
+    # Horizontal cortex connections in l4c beta
+    conns += _horizontal_cortex_connections_in_l4c_beta(cfg)
+    
     return conns
 
 
@@ -381,6 +384,137 @@ def _relay_cells_to_color_preferring_inh_cells(cfg: Config, pop_size: lyr.PopSiz
         [lyr.PARVO_LGN_RELAY_CELL_L_OFF, lyr.COLOR_PREFERRING_INH_M_ON_L_OFF, non_oriented_color_params],
         [lyr.PARVO_LGN_RELAY_CELL_M_ON, lyr.COLOR_PREFERRING_INH_M_ON_L_OFF, non_oriented_color_params],
     ]
+
+
+def _horizontal_cortex_connections_in_l4c_beta(cfg: Config) -> List:
+    connections = _make_exc_to_exc_horizontal_cortex_conns(cfg)
+    connections += _make_exc_to_inh_horizontal_cortex_conns(cfg)
+    connections += _make_inh_to_exc_horizontal_cortex_conns(cfg)
+    connections += _make_inh_to_inh_horizontal_cortex_conns(cfg)
+    
+    return connections
+
+
+def _make_exc_to_exc_horizontal_cortex_conns(cfg: Config) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sigma_deg = 0.05
+    fig_cfg.mask_radius_deg = fig_cfg.sigma_deg * 3.0
+    fig_cfg.center_weight_ns = 0.5
+    fig_cfg.mean_delay_ms = 2.0
+    fig_cfg.std_delay_ms = 0.25
+    fig_cfg.sources = mdl.CORTEX_EXC_CELL
+    fig_cfg.targets = mdl.CORTEX_EXC_CELL
+    fig_cfg.src_row_cnt = cfg.cortex_cnt
+    fig_cfg.target_row_cnt = cfg.cortex_cnt
+    
+    params = _make_circular_conn_dict(fig_cfg)
+    exc_layers = _get_exc_layer_ids()
+    
+    return _make_horizontal_cortex_connections(exc_layers, exc_layers, params)
+
+
+def _make_exc_to_inh_horizontal_cortex_conns(cfg: Config) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sigma_deg = 0.05
+    fig_cfg.mask_radius_deg = fig_cfg.sigma_deg * 3.0
+    fig_cfg.center_weight_ns = 0.5
+    fig_cfg.mean_delay_ms = 2.0
+    fig_cfg.std_delay_ms = 0.25
+    fig_cfg.sources = mdl.CORTEX_EXC_CELL
+    fig_cfg.targets = mdl.CORTEX_INH_CELL
+    fig_cfg.src_row_cnt = cfg.cortex_cnt
+    fig_cfg.target_row_cnt = cfg.cortex_cnt
+    
+    params = _make_circular_conn_dict(fig_cfg)
+    exc_layers = _get_exc_layer_ids()
+    inh_layers = _get_inh_layer_ids()
+    
+    return _make_horizontal_cortex_connections(exc_layers, inh_layers, params)
+
+
+def _make_inh_to_exc_horizontal_cortex_conns(cfg: Config) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sigma_deg = 0.025
+    fig_cfg.mask_radius_deg = fig_cfg.sigma_deg * 3.0
+    fig_cfg.center_weight_ns = -3.0
+    fig_cfg.mean_delay_ms = 2.0
+    fig_cfg.std_delay_ms = 0.25
+    fig_cfg.sources = mdl.CORTEX_INH_CELL
+    fig_cfg.targets = mdl.CORTEX_EXC_CELL
+    fig_cfg.src_row_cnt = cfg.cortex_cnt
+    fig_cfg.target_row_cnt = cfg.cortex_cnt
+    
+    params = _make_circular_conn_dict(fig_cfg)
+    inh_layers = _get_inh_layer_ids()
+    exc_layers = _get_exc_layer_ids()
+    
+    return _make_horizontal_cortex_connections(inh_layers, exc_layers, params)
+
+
+def _make_inh_to_inh_horizontal_cortex_conns(cfg: Config) -> List:
+    fig_cfg = FigConnConfig(cfg)
+    fig_cfg.sigma_deg = 0.025
+    fig_cfg.mask_radius_deg = fig_cfg.sigma_deg * 3.0
+    fig_cfg.center_weight_ns = -3.0
+    fig_cfg.mean_delay_ms = 2.0
+    fig_cfg.std_delay_ms = 0.25
+    fig_cfg.sources = mdl.CORTEX_INH_CELL
+    fig_cfg.targets = mdl.CORTEX_INH_CELL
+    fig_cfg.src_row_cnt = cfg.cortex_cnt
+    fig_cfg.target_row_cnt = cfg.cortex_cnt
+    
+    params = _make_circular_conn_dict(fig_cfg)
+    inh_layers = _get_inh_layer_ids()
+    
+    return _make_horizontal_cortex_connections(inh_layers, inh_layers, params)
+
+
+def _get_exc_layer_ids() -> List[str]:
+    return [
+        lyr.COLOR_LUMINANCE_L_ON_L_OFF_VERTICAL,
+        lyr.COLOR_LUMINANCE_L_ON_L_OFF_HORIZONTAL,
+        lyr.COLOR_LUMINANCE_L_OFF_L_ON_VERTICAL,
+        lyr.COLOR_LUMINANCE_L_OFF_L_ON_HORIZONTAL,
+        lyr.COLOR_LUMINANCE_M_ON_M_OFF_VERTICAL,
+        lyr.COLOR_LUMINANCE_M_ON_M_OFF_HORIZONTAL,
+        lyr.COLOR_LUMINANCE_M_OFF_M_ON_VERTICAL,
+        lyr.COLOR_LUMINANCE_M_OFF_M_ON_HORIZONTAL,
+        lyr.LUMINANCE_PREFERRING_ON_OFF_VERTICAL,
+        lyr.LUMINANCE_PREFERRING_ON_OFF_HORIZONTAL,
+        lyr.LUMINANCE_PREFERRING_OFF_ON_VERTICAL,
+        lyr.LUMINANCE_PREFERRING_OFF_ON_HORIZONTAL,
+        lyr.COLOR_PREFERRING_L_ON_M_OFF,
+        lyr.COLOR_PREFERRING_M_ON_L_OFF,
+    ]
+
+
+def _get_inh_layer_ids() -> List[str]:
+    return [
+        lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_VERTICAL,
+        lyr.COLOR_LUMINANCE_INH_L_ON_L_OFF_HORIZONTAL,
+        lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_VERTICAL,
+        lyr.COLOR_LUMINANCE_INH_L_OFF_L_ON_HORIZONTAL,
+        lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_VERTICAL,
+        lyr.COLOR_LUMINANCE_INH_M_ON_M_OFF_HORIZONTAL,
+        lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_VERTICAL,
+        lyr.COLOR_LUMINANCE_INH_M_OFF_M_ON_HORIZONTAL,
+        lyr.LUMINANCE_PREFERRING_INH_ON_OFF_VERTICAL,
+        lyr.LUMINANCE_PREFERRING_INH_ON_OFF_HORIZONTAL,
+        lyr.LUMINANCE_PREFERRING_INH_OFF_ON_VERTICAL,
+        lyr.LUMINANCE_PREFERRING_INH_OFF_ON_HORIZONTAL,
+        lyr.COLOR_PREFERRING_INH_L_ON_M_OFF,
+        lyr.COLOR_PREFERRING_INH_M_ON_L_OFF,
+    ]
+
+
+def _make_horizontal_cortex_connections(src_layers: List[str], target_layers: List[str], conn_params: Dict) -> List:
+    connections = []
+
+    for src_layer in src_layers:
+        for target_layer in target_layers:
+            connections.append([src_layer, target_layer, conn_params])
+    
+    return connections
 
 
 def _make_circular_conn_dict(cfg: FigConnConfig, kernel=1.0) -> Dict:
