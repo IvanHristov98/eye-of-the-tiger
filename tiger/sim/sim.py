@@ -15,15 +15,15 @@ _SPIKE_DETECTOR_NODE = 'spike_dector_node'
 
 
 class NetRunner:
-    _config: netcfg.Config
+    config: netcfg.Config
     _sim_time: float
     _times: List[float]
     _seeds: List[int]
     _layers_to_gids: Dict[str, int]
-    _layer_ids: List[Tuple[str, int, str]]
+    layer_ids: List[Tuple[str, Tuple, str]]
     
     def __init__(self, sim_time: float) -> None:
-        self._config = netcfg.Config()
+        self.config = netcfg.Config()
         self._sim_time = sim_time
         self._set_timings()
         self._set_seeds()
@@ -31,11 +31,12 @@ class NetRunner:
     def build_network(self) -> None:
         self._set_up_nest()
         
-        models, layers, conns = netsys.get_network(self._config)
+        models, layers, conns = netsys.get_network(self.config)
         
         self._create_models(models)
-        self._layer_ids, self._layers_to_gids = self._create_layers(layers)
+        self.layer_ids, self._layers_to_gids = self._create_layers(layers)
         self._connect_layers(conns)
+        print("Network built")
 
     def init_spike_generators(self, retina_spikes: List) -> None:
         midget_ganglion_cells_l_on_spikes = retina_spikes[0]
@@ -50,17 +51,17 @@ class NetRunner:
         
         cell_cnt = 0
         
-        for i in np.arange(self._config.lgn_cnt):
-            for j in np.arange(self._config.lgn_cnt):
+        for i in np.arange(self.config.lgn_cnt):
+            for j in np.arange(self.config.lgn_cnt):
                 l_on_cells = tp.GetElement(midget_ganglion_cells_l_on_gid, (i, j))
                 nest.SetStatus([l_on_cells[0]], [{'spike_times':midget_ganglion_cells_l_on_spikes[cell_cnt],'spike_weights':[]}])
-                
+
                 l_off_cells = tp.GetElement(midget_ganglion_cells_l_off_gid, (i, j))
                 nest.SetStatus([l_off_cells[0]], [{'spike_times':midget_ganglion_cells_l_off_spikes[cell_cnt],'spike_weights':[]}])
-                
+
                 m_on_cells = tp.GetElement(midget_ganglion_cells_m_on_gid, (i, j))
                 nest.SetStatus([m_on_cells[0]], [{'spike_times':midget_ganglion_cells_m_on_spikes[cell_cnt],'spike_weights':[]}])
-                
+
                 m_off_cells = tp.GetElement(midget_ganglion_cells_m_off_gid, (i, j))
                 nest.SetStatus([m_off_cells[0]], [{'spike_times':midget_ganglion_cells_m_off_spikes[cell_cnt],'spike_weights':[]}])
                 
@@ -76,23 +77,23 @@ class NetRunner:
         return recorders, detectors
 
     def _set_timings(self) -> None:
-        times_count = int(self._sim_time / self._config.sim_step_ms)
+        times_count = int(self._sim_time / self.config.sim_step_ms)
         self._times = np.zeros(times_count)
         
         for i in np.arange(0, int(times_count)):
-            self._times[i] = i * self._config.sim_step_ms
+            self._times[i] = i * self.config.sim_step_ms
 
     def _set_seeds(self) -> None:
         np.random.seed(int(time.time()))
-        self._seeds = np.arange(self._config.nest_thread_cnt) + int((time.time()*100)%2**32)
+        self._seeds = np.arange(self.config.nest_thread_cnt) + int((time.time()*100)%2**32)
 
     def _set_up_nest(self) -> None:
         nest.ResetKernel()
         nest.ResetNetwork()
         
         nest_kernel_status = {
-            "local_num_threads": self._config.nest_thread_cnt,
-            "resolution": self._config.sim_step_ms,
+            "local_num_threads": self.config.nest_thread_cnt,
+            "resolution": self.config.sim_step_ms,
             "rng_seeds": list(self._seeds)
         }
         nest.SetKernelStatus(nest_kernel_status)
@@ -110,7 +111,7 @@ class NetRunner:
             gid = tp.CreateLayer(layer[1])
             
             # layer, gid, cell_type
-            layer_ids.append((layer[0], gid[0], layer[1]['elements']))
+            layer_ids.append((layer[0], gid, layer[1]['elements']))
             layers_to_gids[layer[0]] = gid
             
         return layer_ids, layers_to_gids
@@ -124,19 +125,19 @@ class NetRunner:
 
     def _make_recorders(self, recorded_models: List) -> List:
         recorder_params = {
-            'interval'   : self._config.sim_step_ms,
+            'interval'   : self.config.sim_step_ms,
             'record_from': ['V_m'],
             'record_to'  : ['memory'],
             'withgid'    : True,
             'withtime'   : False
         }
         
-        nest.CopyModel('multimeter', _MULTIMETER_NODE, recorder_params)
+        # nest.CopyModel('multimeter', _MULTIMETER_NODE, recorder_params)
         
         recorders = []
         
         for pop, model in recorded_models:
-            rec = nest.Create(_MULTIMETER_NODE)
+            rec = nest.Create('multimeter', params={'interval': self.config.sim_step_ms, 'record_from': ["V_m"]})
             recorders.append([rec, pop, model])
             targets = []
             
