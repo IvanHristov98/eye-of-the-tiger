@@ -32,7 +32,7 @@ class FigConnConfig:
 
 # Returns connections between layers.
 def get_connections(cfg: Config) -> List:
-    pop_size = lyr.pop_size_from_cfg()
+    pop_size = lyr.pop_size_from_cfg(cfg)
     _copy_synapse_model()
 
     # LGN connections    
@@ -162,6 +162,7 @@ def _relay_cells_to_color_luminance_cells(cfg: Config, pop_size: lyr.PopSize) ->
     fig_cfg.mean_delay_ms = 3.0 # (Hill_2005)
     fig_cfg.std_delay_ms = 0.25 # (Hill_2005)
     fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.targets = mdl.CORTEX_EXC_CELL
     fig_cfg.target_row_cnt = mdl.CORTEX_EXC_CELL
     fig_cfg.src_row_cnt = cfg.lgn_cnt
     fig_cfg.target_row_cnt = pop_size.rows_color_luminance_exc
@@ -208,6 +209,7 @@ def _relay_cells_to_luminance_preferring_cells(cfg: Config, pop_size: lyr.PopSiz
     fig_cfg.mean_delay_ms = 3.0 # (Hill_2005)
     fig_cfg.std_delay_ms = 0.25 # (Hill_2005)
     fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.targets = mdl.CORTEX_EXC_CELL
     fig_cfg.target_row_cnt = mdl.CORTEX_EXC_CELL
     fig_cfg.src_row_cnt = cfg.lgn_cnt
     fig_cfg.target_row_cnt = pop_size.rows_color_luminance_exc
@@ -254,6 +256,7 @@ def _relay_cells_to_color_preferring_cells(cfg: Config, pop_size: lyr.PopSize) -
     fig_cfg.mean_delay_ms = 3.0
     fig_cfg.std_delay_ms = 0.25
     fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.targets = mdl.CORTEX_EXC_CELL
     fig_cfg.target_row_cnt = mdl.CORTEX_EXC_CELL
     fig_cfg.src_row_cnt = cfg.lgn_cnt
     fig_cfg.target_row_cnt = pop_size.rows_color_preferring_exc
@@ -277,6 +280,7 @@ def _relay_cells_to_color_luminance_inh_cells(cfg: Config, pop_size: lyr.PopSize
     fig_cfg.mean_delay_ms = 3.0 # (Hill_2005)
     fig_cfg.std_delay_ms = 0.25 # (Hill_2005)
     fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.targets = mdl.CORTEX_INH_CELL
     fig_cfg.target_row_cnt = mdl.CORTEX_INH_CELL
     fig_cfg.src_row_cnt = cfg.lgn_cnt
     fig_cfg.target_row_cnt = pop_size.rows_color_luminance_inh
@@ -323,6 +327,7 @@ def _relay_cells_to_luminance_preferring_inh_cells(cfg: Config, pop_size: lyr.Po
     fig_cfg.mean_delay_ms = 3.0 # (Hill_2005)
     fig_cfg.std_delay_ms = 0.25 # (Hill_2005)
     fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.targets = mdl.CORTEX_INH_CELL
     fig_cfg.target_row_cnt = mdl.CORTEX_INH_CELL
     fig_cfg.src_row_cnt = cfg.lgn_cnt
     fig_cfg.target_row_cnt = pop_size.rows_color_luminance_inh
@@ -369,6 +374,7 @@ def _relay_cells_to_color_preferring_inh_cells(cfg: Config, pop_size: lyr.PopSiz
     fig_cfg.mean_delay_ms = 3.0
     fig_cfg.std_delay_ms = 0.25
     fig_cfg.sources = mdl.LGN_RELAY_CELL
+    fig_cfg.targets = mdl.CORTEX_INH_CELL
     fig_cfg.target_row_cnt = mdl.CORTEX_INH_CELL
     fig_cfg.src_row_cnt = cfg.lgn_cnt
     fig_cfg.target_row_cnt = pop_size.rows_color_preferring_inh

@@ -3,9 +3,13 @@
 import nest
 import numpy
 
+import tiger.sim.sim as sim
+
 
 def main():
-    pass
+    simulator = sim.NetRunner(3000)
+    simulator.build_network()
+    # simulator.init_spike_generators(retina_spikes=[])
 
 
 if __name__ == "__main__":

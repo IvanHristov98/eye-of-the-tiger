@@ -6,8 +6,9 @@ class Config:
     sim_step_ms: float
     
     def __init__(self) -> None:
-        self.lgn_cnt = 40
-        self.cortex_cnt = 80
+        # Reduced because of high complexity during connection of neurons.
+        self.lgn_cnt = 20
+        self.cortex_cnt = 40
         self.vis_angle_deg = 2.0
         self.nest_thread_cnt = 8
         self.sim_step_ms = 1.0

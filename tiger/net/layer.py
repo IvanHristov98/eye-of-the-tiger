@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 from tiger.net.cfg import Config
 import tiger.net.model as mdl
@@ -85,16 +85,20 @@ def pop_size_from_cfg(cfg: Config) -> PopSize:
     return pop_size
 
 
-def layers(cfg:Config) -> Tuple[str, Dict]:
-    ls = [_lgn_layers(cfg)]
-    ls += [_cortex_color_luminance_exc_layers(cfg), _cortex_luminance_preferring_exc_layers(cfg), _cortex_color_preferring_exc_layers(cfg)]
-    ls += [_cortex_color_luminance_inh_layers(cfg), _cortex_luminance_preferring_inh_layers(cfg), _cortex_color_preferring_inh_layers(cfg)]
-    ls += [_noise_gen_layers(cfg)]
-    
+def layers(cfg:Config) -> List[Tuple[str, Dict]]:
+    ls = _lgn_layers(cfg)
+    ls += _cortex_color_luminance_exc_layers(cfg)
+    ls += _cortex_luminance_preferring_exc_layers(cfg)
+    ls += _cortex_color_preferring_exc_layers(cfg)
+    ls += _cortex_color_luminance_inh_layers(cfg)
+    ls += _cortex_luminance_preferring_inh_layers(cfg)
+    ls += _cortex_color_preferring_inh_layers(cfg)
+    ls += _noise_gen_layers(cfg)
+
     return ls
 
 
-def _lgn_layers(cfg: Config) -> Tuple[str, Dict]:
+def _lgn_layers(cfg: Config) -> List[Tuple[str, Dict]]:
     base_props = _base_lgn_layer_props(cfg)
     
     midget_ganglion_cell_layers = [
@@ -117,8 +121,8 @@ def _lgn_layers(cfg: Config) -> Tuple[str, Dict]:
     return midget_ganglion_cell_layers + parvo_lgn_relay_cell_layers + parvo_lgn_interneuron_layers
 
 
-def _cortex_color_luminance_exc_layers(cfg: Config) -> Tuple[str, Dict]:
-    base_props = _base_cortex_layer_props()
+def _cortex_color_luminance_exc_layers(cfg: Config) -> List[Tuple[str, Dict]]:
+    base_props = _base_cortex_layer_props(cfg)
     pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_EXC_CELL,
@@ -139,8 +143,8 @@ def _cortex_color_luminance_exc_layers(cfg: Config) -> Tuple[str, Dict]:
     ]
 
 
-def _cortex_luminance_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
-    base_props = _base_cortex_layer_props()
+def _cortex_luminance_preferring_exc_layers(cfg: Config) -> List[Tuple[str, Dict]]:
+    base_props = _base_cortex_layer_props(cfg)
     pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_EXC_CELL,
@@ -156,8 +160,8 @@ def _cortex_luminance_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
     ]
 
 
-def _cortex_color_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
-    base_props = _base_cortex_layer_props()
+def _cortex_color_preferring_exc_layers(cfg: Config) -> List[Tuple[str, Dict]]:
+    base_props = _base_cortex_layer_props(cfg)
     pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_EXC_CELL,
@@ -171,8 +175,8 @@ def _cortex_color_preferring_exc_layers(cfg: Config) -> Tuple[str, Dict]:
     ]
 
 
-def _cortex_color_luminance_inh_layers(cfg: Config) -> Tuple[str, Dict]:
-    base_props = _base_cortex_layer_props()
+def _cortex_color_luminance_inh_layers(cfg: Config) -> List[Tuple[str, Dict]]:
+    base_props = _base_cortex_layer_props(cfg)
     pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_INH_CELL,
@@ -192,8 +196,8 @@ def _cortex_color_luminance_inh_layers(cfg: Config) -> Tuple[str, Dict]:
     ]
 
 
-def _cortex_luminance_preferring_inh_layers(cfg: Config) -> Tuple[str, Dict]:
-    base_props = _base_cortex_layer_props()
+def _cortex_luminance_preferring_inh_layers(cfg: Config) -> List[Tuple[str, Dict]]:
+    base_props = _base_cortex_layer_props(cfg)
     pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_INH_CELL,
@@ -209,8 +213,8 @@ def _cortex_luminance_preferring_inh_layers(cfg: Config) -> Tuple[str, Dict]:
     ]
 
 
-def _cortex_color_preferring_inh_layers(cfg: Config) -> Tuple[str, Dict]:
-    base_props = _base_cortex_layer_props()
+def _cortex_color_preferring_inh_layers(cfg: Config) -> List[Tuple[str, Dict]]:
+    base_props = _base_cortex_layer_props(cfg)
     pop_size = pop_size_from_cfg(cfg)
     specific_props =  {
         'elements': mdl.CORTEX_INH_CELL,
@@ -224,11 +228,11 @@ def _cortex_color_preferring_inh_layers(cfg: Config) -> Tuple[str, Dict]:
     ]
 
 
-def _noise_gen_layers(cfg: Config) -> Tuple[str, Dict]:
-    base_lgn_props = _base_lgn_layer_props()
+def _noise_gen_layers(cfg: Config) -> List[Tuple[str, Dict]]:
+    base_lgn_props = _base_lgn_layer_props(cfg)
     lgn_noise_layers = [(NOISE_GENERATORS_LGN, _merged_dicts(base_lgn_props, {'elements': mdl.THALAMO_NOISE}))]
     
-    base_cortex_props = _base_cortex_layer_props()
+    base_cortex_props = _base_cortex_layer_props(cfg)
     ps = pop_size_from_cfg(cfg)
     
     cortex_exc_noise_layers = [
